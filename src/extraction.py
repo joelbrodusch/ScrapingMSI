@@ -1,6 +1,7 @@
 import urllib.request as libreq
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import os
 
 def grep_articles(keyword, max_articles):
     """
@@ -46,6 +47,7 @@ def parse_articles():
         # Formate la date de l'article
         articles[n]["published"] = format_date(articles[n]["published"])
         n += 1
+    os.remove('articles.xml')
     return articles
 
 def format_date(date):
