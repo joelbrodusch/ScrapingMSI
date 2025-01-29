@@ -1,2 +1,2 @@
 # ScrapingMSI
-Projey MSI - BUT 2 TI
+Projet MSI - BUT 2 TI
