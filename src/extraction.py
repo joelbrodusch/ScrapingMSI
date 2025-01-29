@@ -1,5 +1,6 @@
 import urllib.request as libreq
 import xml.etree.ElementTree as ET
+from datetime import datetime
 
 def grep_articles(keyword, max_articles):
     """
@@ -21,9 +22,10 @@ def parse_articles():
     :return: une liste d'articles sous forme de dictionnaires contenant les informations des articles
     """
     articles = []
+    n = 0
     tree = ET.parse('articles.xml')
     racine = tree.getroot()
-    #
+    # Création de la liste d'articles
     for article in racine.findall('{http://www.w3.org/2005/Atom}entry'):
         articles.append({
             "id": article.find('{http://www.w3.org/2005/Atom}id').text,
@@ -34,15 +36,26 @@ def parse_articles():
         })
         # Ajoute les différents auteurs de l'article au dictionnaire associé
         for auteur in article.findall('{http://www.w3.org/2005/Atom}author'):
-            articles[len(articles)-1]["author"].append(auteur.find('{http://www.w3.org/2005/Atom}name').text)
+            articles[n]["author"].append(auteur.find('{http://www.w3.org/2005/Atom}name').text)
        # Ajoute le lien du pdf de l'article
         for link in article.findall('{http://www.w3.org/2005/Atom}link'):
             if link.get('title') == "pdf":
-                articles[len(articles)-1]["pdf"] = link.get('href')
+                articles[n]["pdf"] = link.get('href')
             if link.get('title') == "doi":
-                articles[len(articles)-1]["doi"] = link.get('href')
+                articles[n]["doi"] = link.get('href')
+        # Formate la date de l'article
+        articles[n]["published"] = format_date(articles[n]["published"])
+        n += 1
     return articles
 
-liste = grep_articles("6g", 100)
-print(len(liste))
-print(liste)
+def format_date(date):
+    """
+    Format la date passée en paramètre. Ex : 13 Sep 2020
+    :param date: date à formater
+    :return: la nouvelle date formatée
+    """
+    new_date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+    s = new_date.strftime("%d")
+    s += " " + new_date.strftime("%b")
+    s += " " + new_date.strftime("%Y")
+    return s
