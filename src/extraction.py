@@ -25,9 +25,9 @@ def parse_articles():
     articles = []
     n = 0
     tree = ET.parse('articles.xml')
-    racine = tree.getroot()
+    grosse_racine = tree.getroot()
     # Création de la liste d'articles
-    for article in racine.findall('{http://www.w3.org/2005/Atom}entry'):
+    for article in grosse_racine.findall('{http://www.w3.org/2005/Atom}entry'):
         articles.append({
             "id": article.find('{http://www.w3.org/2005/Atom}id').text,
             "published": article.find('{http://www.w3.org/2005/Atom}published').text,
