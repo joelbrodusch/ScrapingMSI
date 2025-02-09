@@ -1,17 +1,23 @@
 import urllib.request as libreq
 import xml.etree.ElementTree as ET
 from datetime import datetime
-import os
 
-def grep_articles(keyword, max_articles):
+def grep_articles(keyword=None, max_articles=None):
     """
     Effectue une recherche d'articles sur arxviv suivant le mot-clé et le nombre max d'articles passés en paramètre.
-    :param keyword: Le mot clés de la recherche
-    :param max_articles: Le nombre d'articles que vous souhaitez
-    :return: une liste d'articles sous forme de dictionnaires contenant les informations des articles
+    :param keyword: Le mot clés de la recherche, pour utiliser plusieurs mot-clés séparés les par un espace
+    :param max_articles: Le nombre d'articles que vous souhaitez, par défaut 10
+    :return: une liste d'articles sous forme de dictionnaires contenant les informations des articles.
     """
-    with libreq.urlopen('http://export.arxiv.org/api/query?search_query=all:'+keyword+"&max_results="+str(max_articles)) as url:
-        r = url.read()
+    if keyword is None:
+        print("Mot-clé manquant, veuillez ajouter un objet de recherche")
+        return None
+    if max_articles is None:
+        with libreq.urlopen('http://export.arxiv.org/api/query?search_query=all:' + keyword) as url:
+            r = url.read()
+    else:
+        with libreq.urlopen('http://export.arxiv.org/api/query?search_query=all:'+ keyword + "&max_results=" + str(max_articles)) as url:
+            r = url.read()
     f = open("articles.xml", 'w')
     f.write(r.decode('utf-8'))
     f.close()
@@ -20,7 +26,7 @@ def grep_articles(keyword, max_articles):
 def parse_articles():
     """
     Parcours le fichier xml contenant les articles recherchés pour en extraire une liste.
-    :return: une liste d'articles sous forme de dictionnaires contenant les informations des articles
+    :return: Une liste d'articles sous forme de dictionnaires contenant les informations des articles
     """
     articles = []
     n = 0
@@ -34,6 +40,8 @@ def parse_articles():
             "title": article.find('{http://www.w3.org/2005/Atom}title').text,
             "summary": article.find('{http://www.w3.org/2005/Atom}summary').text,
             "author": [],
+            "pdf": "",
+            "doi": ""
         })
         # Ajoute les différents auteurs de l'article au dictionnaire associé
         for auteur in article.findall('{http://www.w3.org/2005/Atom}author'):
@@ -47,7 +55,6 @@ def parse_articles():
         # Formate la date de l'article
         articles[n]["published"] = format_date(articles[n]["published"])
         n += 1
-    os.remove('articles.xml')
     return articles
 
 def format_date(date):
